@@ -1,0 +1,121 @@
+ GRAMMARS 
+
+program - > program id (identifier_list ) ; declarations subprogram_delcarations compound_statement. 
+statement - > id variable_procedure | compound_statement | if_statement | while_statement
+
+variable_procedure - > var_expression  | id_expression | ϵ
+while_statement - > while expression do statement
+if_statement - > if expression then statement else_part
+else_part - > else statement | ϵ
+statement_loop - > ; statement statement_loop | ϵ
+statement_list - > statement statement_loop
+optional_statements - > statement_list | ϵ
+compound_statement - > begin optional_statements end
+
+subprogram_declarations	- > subprogram_declaration subprogram_declarations | ϵ
+subprogram_declaration - >  subprogram_head declarations compound_statement
+subprogram_head - >	function id arguments : standard_type ; |  procedure id arguments ;
+
+parameter_list - >	identifier_list : type parameter_loop 
+parameter_loop - > ; identifier_list : type parameter_loop | ϵ
+arguments - > ( parameter_list ) | ϵ
+
+
+var_expression -> [ expression ] assignop expression | assignop expression
+--------------------------------------------
+unused : procedure_statement - > id id_expression
+unused : variable - > id var_expression
+----------------------------------------------
+
+factor - > id id_expression | num | (expression) | not factor
+id_expression -> ( expression_list ) | ϵ
+
+expression_list - > expression expression_list_loop 
+expression_list_loop - > , expression expression_list_loop | ϵ
+
+expression - > simple_expression expression_relop 
+expression_relop - > relop simple_expression | ϵ
+
+simple_expression - > se_static_part se_loop 
+se_static_part - > term | sign term
+se_loop - > addop term se_loop | ϵ
+
+term - > factor term_loop
+term_loop - > mulop factor term_loop | ϵ
+
+addop - > + | - | or
+mulop - > * | / | div | mod | and
+relop - > = | <> | < | <= | > | >= 
+sign - > + | - 
+num - > integer | real
+
+declarations - > var identifier_list : type ;  declarations | ϵ
+identifier_list - > id identifier_loop
+identifier_loop - > , id  identifier_loop |  ϵ
+
+type - > type_array | standard_type
+type_array -> array[num..num] of standard_type 
+standard_type -> integer | real
+
+** FIRSTS **
+
+program : program
+statement :id,begin,if,while 
+
+
+variable_procedure : [,(,ϵ
+while_statement : while 
+if_statement: if
+else_part : else , ϵ
+statement_loop : `;` , ϵ
+
+*statement_list:first(statement)
+*optional_statements first( statement_list ), ϵ
+compound_statement : begin 
+
+
+subprogram_declarations : function,procedure
+subprogram_declaration : function,procedure
+subprogram_head: function,procedure
+
+parameter_list: id
+parameter_loop: `;`,ϵ
+arguments:(,ϵ
+
+
+var_expression : [,:=,ϵ
+
+unsed :
+procedure_statement : id 
+variable : id 
+----------
+
+factor : id,num,(,not
+id_expression : (,ϵ
+
+expression_list  : id,num,(,not,sign
+expression_list_loop : `,`,ϵ
+
+expression : id,num,(,not,sign
+expression_relop : =,<>, < , <= , > , >=
+
+simple_expression : id,num,(,not,sign
+se_static_part :id,num,(,not,sign
+se_loop : +,-,or
+
+term: id,num,(,not
+term_loop=*,/,div,mod,and,ϵ
+
+addop:+,-,or
+mulop:*,/,div,mod,and
+relop:=,<>, < , <= , > , >=
+sign: +,-
+num:integer,real
+
+declaration : var,ϵ
+identifier_list:id
+identifier_loop:`,`,ϵ
+
+type:array,interger,real
+type_array:array
+standard_type:interger,real
